@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
 
   if (!chat.title) {
     const { text: title } = await generateText({
-      model: 'openai/gpt-4o-mini',
+      model: 'mistral/ministral-3b',
       system: `You are a title generator for a chat:
           - Generate a short title based on the first user's message
           - The title should be less than 30 characters long
