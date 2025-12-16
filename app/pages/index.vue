@@ -42,7 +42,7 @@ const quickChats = [
     icon: 'i-logos-tailwindcss-icon'
   },
   {
-    label: 'What is the weather in Bordeaux?',
+    label: 'What is the weather in Ho Chi Minh City?',
     icon: 'i-lucide-sun'
   },
   {
