@@ -6,9 +6,6 @@ on:
 
 jobs:
   build-and-deploy:
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,6 +31,9 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            AI_GATEWAY_API_KEY=${{ secrets.AI_GATEWAY_API_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
