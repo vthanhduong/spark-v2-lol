@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-ui-template-chat",
+  "name": "slave-chan-playground",
   "private": true,
   "type": "module",
   "scripts": {
@@ -42,5 +42,5 @@
     "typescript": "^5.9.3",
     "vue-tsc": "^3.1.5"
   },
-  "packageManager": "pnpm@10.23.0"
+  "packageManager": "pnpm@9.7.1"
 }
