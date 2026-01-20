@@ -38,7 +38,7 @@ export default defineNuxtConfig({
   },
 
   hub: {
-    db: 'sqlite'
+    db: 'postgresql'
   },
 
   eslint: {

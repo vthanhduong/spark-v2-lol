@@ -15,6 +15,7 @@
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.12",
     "@ai-sdk/vue": "^3.0.33",
+    "@electric-sql/pglite": "^0.3.15",
     "@iconify-json/logos": "^1.2.10",
     "@iconify-json/lucide": "^1.2.74",
     "@iconify-json/simple-icons": "^1.2.62",
@@ -29,6 +30,7 @@
     "nuxt-auth-utils": "^0.5.25",
     "nuxt-charts": "2.0.0",
     "pg": "^8.16.3",
+    "postgres": "^3.4.8",
     "shiki-stream": "^0.1.3"
   },
   "devDependencies": {
