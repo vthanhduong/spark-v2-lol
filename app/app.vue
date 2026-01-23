@@ -29,7 +29,6 @@ useSeoMeta({
   twitterImage: 'https://ui.nuxt.com/assets/templates/nuxt/chat-light.png',
   twitterCard: 'summary_large_image'
 })
-useDevToolsDetector()
 </script>
 
 <template>
