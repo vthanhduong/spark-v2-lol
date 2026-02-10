@@ -1,64 +1,84 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
-    '@nuxt/eslint',
-    '@nuxt/ui',
-    '@nuxtjs/mdc',
-    '@nuxthub/core',
-    'nuxt-auth-utils',
-    'nuxt-charts'
+    "@nuxt/eslint",
+    "@nuxt/ui",
+    "@nuxtjs/mdc",
+    "@nuxthub/core",
+    "nuxt-auth-utils",
+    "nuxt-charts",
   ],
 
   devtools: {
-    enabled: true
+    enabled: true,
   },
 
-  css: ['~/assets/css/main.css'],
+  app: {
+    head: {
+      link: [
+        {
+          rel: "preconnect",
+          href: "https://fonts.googleapis.com",
+        },
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossorigin: "anonymous",
+        },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400&family=Geo:wght@400&display=swap",
+        },
+      ],
+    },
+  },
+
+  css: ["~/assets/css/main.css"],
 
   mdc: {
     headings: {
-      anchorLinks: false
+      anchorLinks: false,
     },
     highlight: {
       // noApiRoute: true
-      shikiEngine: 'javascript'
-    }
+      shikiEngine: "javascript",
+    },
   },
 
   runtimeConfig: {
-    sessionPassword: '',
+    sessionPassword: "",
     oauth: {
       github: {
-        clientId: '',
-        clientSecret: ''
-      }
+        clientId: "",
+        clientSecret: "",
+      },
     },
-    aiGatewayApiKey: '',
-    databaseUrl: ''
+    aiGatewayApiKey: "",
+    databaseUrl: "",
   },
 
   experimental: {
-    viewTransition: true
+    viewTransition: true,
   },
 
-  compatibilityDate: '2024-07-11',
+  compatibilityDate: "2024-07-11",
 
   nitro: {
     experimental: {
-      openAPI: true
-    }
+      openAPI: true,
+    },
   },
 
   hub: {
-    db: 'postgresql'
+    db: "postgresql",
   },
 
   eslint: {
     config: {
       stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
-  }
-})
+        commaDangle: "never",
+        braceStyle: "1tbs",
+      },
+    },
+  },
+});

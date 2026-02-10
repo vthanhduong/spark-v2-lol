@@ -1,35 +1,35 @@
 <script setup lang="ts">
-const input = ref('')
-const loading = ref(false)
+const input = ref("");
+const loading = ref(false);
 
-const { model } = useModels()
+const { model } = useModels();
 
 async function createChat(prompt: string) {
-  input.value = prompt
-  loading.value = true
-  const chat = await $fetch('/api/chats', {
-    method: 'POST',
-    body: { input: prompt }
-  })
+  input.value = prompt;
+  loading.value = true;
+  const chat = await $fetch("/api/chats", {
+    method: "POST",
+    body: { input: prompt },
+  });
 
-  refreshNuxtData('chats')
-  navigateTo(`/chat/${chat?.id}`)
+  refreshNuxtData("chats");
+  navigateTo(`/chat/${chat?.id}`);
 }
 
 function onSubmit() {
-  createChat(input.value)
+  createChat(input.value);
 }
 
 const quickChats = [
   {
-    label: 'What is the weather in Ho Chi Minh City?',
-    icon: 'i-lucide-sun'
+    label: "What is the weather in Ho Chi Minh City?",
+    icon: "i-lucide-sun",
   },
   {
-    label: 'Show me 5 charts of your love for your master',
-    icon: 'i-lucide-line-chart'
-  }
-]
+    label: "Show me 5 charts of your love for your master",
+    icon: "i-lucide-line-chart",
+  },
+];
 </script>
 
 <template>
@@ -39,8 +39,10 @@ const quickChats = [
     </template>
 
     <template #body>
-      <UContainer class="flex-1 flex flex-col justify-center gap-4 sm:gap-6 py-8">
-        <h1 class="text-2xl sm:text-3xl text-highlighted font-bold">
+      <UContainer
+        class="flex-1 flex flex-col justify-center gap-4 sm:gap-6 py-8"
+      >
+        <h1 class="geo text-2xl sm:text-3xl text-highlighted font-bold">
           i do whatever i want and bbi u better stfu cuz u aint do shit :)
         </h1>
 
