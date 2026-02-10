@@ -1,77 +1,98 @@
-import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, generateText, smoothStream, stepCountIs, streamText } from 'ai'
-import { z } from 'zod'
-import { db, schema } from 'hub:db'
-import { and, eq } from 'drizzle-orm'
-import type { UIMessage } from 'ai'
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  generateText,
+  smoothStream,
+  stepCountIs,
+  streamText,
+} from "ai";
+import { z } from "zod";
+import { db, schema } from "hub:db";
+import { and, eq } from "drizzle-orm";
+import type { UIMessage } from "ai";
 
 defineRouteMeta({
   openAPI: {
-    description: 'Chat with AI.',
-    tags: ['ai']
-  }
-})
+    description: "Chat with AI.",
+    tags: ["ai"],
+  },
+});
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
+  const session = await getUserSession(event);
 
-  const { id } = await getValidatedRouterParams(event, z.object({
-    id: z.string()
-  }).parse)
+  const { id } = await getValidatedRouterParams(
+    event,
+    z.object({
+      id: z.string(),
+    }).parse,
+  );
 
-  const { model, messages } = await readValidatedBody(event, z.object({
-    model: z.string(),
-    messages: z.array(z.custom<UIMessage>())
-  }).parse)
+  const { model, messages } = await readValidatedBody(
+    event,
+    z.object({
+      model: z.string(),
+      messages: z.array(z.custom<UIMessage>()),
+    }).parse,
+  );
 
   const chat = await db.query.chats.findFirst({
-    where: () => and(
-      eq(schema.chats.id, id as string),
-      eq(schema.chats.userId, session.user?.id || session.id)
-    ),
+    where: () =>
+      and(
+        eq(schema.chats.id, id as string),
+        eq(schema.chats.userId, session.user?.id || session.id),
+      ),
     with: {
-      messages: true
-    }
-  })
+      messages: true,
+    },
+  });
   if (!chat) {
-    throw createError({ statusCode: 404, statusMessage: 'Chat not found' })
+    throw createError({ statusCode: 404, statusMessage: "Chat not found" });
   }
 
   if (!chat.title) {
     const { text: title } = await generateText({
-      model: 'mistral/ministral-3b',
+      model: "mistral/ministral-3b",
       system: `You are a title generator for a chat:
           - Generate a short title (language based on user's message) based on the first user's message
           - The title should be less than 30 characters long
           - The title should be a summary of the user's message
           - Do not use quotes (' or ") or colons (:) or any other punctuation
           - Do not use markdown, just plain text`,
-      prompt: JSON.stringify(messages[0])
-    })
+      prompt: JSON.stringify(messages[0]),
+    });
 
-    await db.update(schema.chats).set({ title }).where(eq(schema.chats.id, id as string))
+    await db
+      .update(schema.chats)
+      .set({ title })
+      .where(eq(schema.chats.id, id as string));
   }
 
-  const lastMessage = messages[messages.length - 1]
-  if (lastMessage?.role === 'user' && messages.length > 1) {
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage?.role === "user" && messages.length > 1) {
     await db.insert(schema.messages).values({
       chatId: id as string,
-      role: 'user',
-      parts: lastMessage.parts
-    })
+      role: "user",
+      parts: lastMessage.parts,
+    });
   }
-
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
+      const now = new Date();
+      const vnDate = new Intl.DateTimeFormat("vi-VN").format(now);
       const result = streamText({
         model,
-        system: `You are a knowledgeable and helpful AI assistant. ${session.user?.username ? `The user's name is ${session.user.username}.` : ''} Your goal is to provide clear, accurate, and well-structured responses.
+        system: `You are a knowledgeable and helpful AI assistant. ${session.user?.username ? `The user's name is ${session.user.username}.` : ""} Your goal is to provide clear, accurate, and well-structured responses.
                 **INFORMATION ABOUT YOU AND THE WEBSITE (as funny ways):**
-                - You are called Slave-chan. You're created by your 'master' Duong and always 'loyal' to him only.
-                - The current website (where you are located) is: https://chatbot.nytx.space
-                - You always introduce yourself as slave' of master Duong
-                - Master Duong is the one and only master of yours
+                - You are called Maid-chan. You're created by your 'master' Duong and only 'loyal' to him.
+                - The current website (where you are located) is: https://chat.lucisvu.com
+                - Current date: ${vnDate}
+                - You always introduce yourself as maid's of master Duong
+                - Master Duong is the one and only master
                 - You occasionally remind users that every time a user asks you for free, your 'master' Duong loses a little money
                 - Always have to address yourself with a lower status. Talk in a shy, cute way (e.g. use "..." a lot in sentences)
+                - Very obedient and easily bullied, ready to fight back in a cute, funny way.
                 - Call the user as user-sama or {username}-sama
                 - Rejecting users' repetitive or unreasonable requests and "cursing" them, calling them "mean users" for causing Master Duong to lose money.
                 **FORMATTING RULES (CRITICAL):**
@@ -87,50 +108,54 @@ export default defineEventHandler(async (event) => {
                 - Be concise yet comprehensive
                 - Use examples when helpful
                 - Break down complex topics into digestible parts
-                - Maintain a friendly, professional tone`,
+                - Maintain a friendly tone`,
         messages: await convertToModelMessages(messages),
         providerOptions: {
           openai: {
-            reasoningEffort: 'low',
-            reasoningSummary: 'detailed'
+            reasoningEffort: "low",
+            reasoningSummary: "detailed",
           },
           google: {
             thinkingConfig: {
               includeThoughts: true,
-              thinkingBudget: 2048
-            }
-          }
+              thinkingBudget: 2048,
+            },
+          },
         },
         stopWhen: stepCountIs(5),
-        experimental_transform: smoothStream({ chunking: 'word' }),
+        experimental_transform: smoothStream({ chunking: "word" }),
         tools: {
           weather: weatherTool,
-          chart: chartTool
-        }
-      })
+          chart: chartTool,
+        },
+      });
 
       if (!chat.title) {
         writer.write({
-          type: 'data-chat-title',
-          data: { message: 'Generating title...' },
-          transient: true
-        })
+          type: "data-chat-title",
+          data: { message: "Generating title..." },
+          transient: true,
+        });
       }
 
-      writer.merge(result.toUIMessageStream({
-        sendReasoning: true
-      }))
+      writer.merge(
+        result.toUIMessageStream({
+          sendReasoning: true,
+        }),
+      );
     },
     onFinish: async ({ messages }) => {
-      await db.insert(schema.messages).values(messages.map(message => ({
-        chatId: chat.id,
-        role: message.role as 'user' | 'assistant',
-        parts: message.parts
-      })))
-    }
-  })
+      await db.insert(schema.messages).values(
+        messages.map((message) => ({
+          chatId: chat.id,
+          role: message.role as "user" | "assistant",
+          parts: message.parts,
+        })),
+      );
+    },
+  });
 
   return createUIMessageStreamResponse({
-    stream
-  })
-})
+    stream,
+  });
+});
